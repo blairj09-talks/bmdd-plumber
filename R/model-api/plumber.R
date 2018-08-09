@@ -2,7 +2,7 @@ library(plumber)
 library(ggplot2)
 
 # Load model
-cars_model <- readRDS(here::here("R", "model-api", "cars-model.rds"))
+cars_model <- readRDS("cars-model.rds")
 
 #* @apiTitle mtcars model API
 #* @apiDescription Endpoints for working with mtcars dataset model
