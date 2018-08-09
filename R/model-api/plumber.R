@@ -2,7 +2,7 @@ library(plumber)
 library(ggplot2)
 
 # Load model
-cars_model <- readr::read_rds(here::here("R", "model-api", "cars-model.rds"))
+cars_model <- readRDS(here::here("R", "model-api", "cars-model.rds"))
 
 #* @apiTitle mtcars model API
 #* @apiDescription Endpoints for working with mtcars dataset model
@@ -20,12 +20,21 @@ function(req){
 
 #* Parse and predict on model data for future endpoints
 #* @filter predict
-function(req) {
+function(req, res) {
   # browser()
   # Only parse responseBody if final endpoint is /predict/...
   if (grepl("predict", req$PATH_INFO)) {
     # Parse postBody into data.frame and store in req
-    req$predict_data <- jsonlite::fromJSON(req$postBody)
+    req$predict_data <- tryCatch(jsonlite::fromJSON(req$postBody),
+                                 error = function(e) NULL)
+    if (is.null(req$predict_data)) {
+      res$status <- 400
+      return(
+        list(
+          error = "No JSON data included in request body."
+        )
+      )
+    }
     # Predict based on values in postBody and store in req
     req$predicted_values <- predict(cars_model, req$predict_data)
   }
@@ -41,17 +50,25 @@ function(req) {
 }
 
 #* Predicted values in nice HTML table
-#* @param col Column name to be highlighted
+#* @param column:character Column name to be highlighted
+#* @response 400 Invalid column specified
 #* @html
 #* @post /predict/table/<column>
-function(column, req) {
+function(column, req, res) {
+  table_data <- cbind(req$predict_data, predicted_mpg = req$predicted_values)
+  
+  # Error if column isn't in data
+  if (!column %in% names(table_data)) {
+    res$status <- 400
+    return()
+  }
+  
   format_list <- list(
     predicted_mpg = formattable::color_tile("red", "white")
   )
   
   format_list[[column]] <- formattable::color_tile("white", "red")
   
-  table_data <- cbind(req$predict_data, predicted_mpg = req$predicted_values)
   table_data <- table_data[order(table_data$predicted_mpg),]
   formattable::format_table(table_data, format_list, row.names = FALSE)
 }
@@ -62,7 +79,7 @@ function(column, req) {
 #* @png
 #* @post /predict/plot
 function(req, x, y){
-  plot_data <- dplyr::bind_cols(req$predict_data, predicted_mpg = req$predicted_values)
+  plot_data <- cbind(req$predict_data, predicted_mpg = req$predicted_values)
   p <- ggplot(plot_data, aes_string(x = x, y = y)) +
     geom_point() +
     theme_minimal()
