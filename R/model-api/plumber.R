@@ -1,8 +1,8 @@
 library(plumber)
-library(tidyverse)
+library(ggplot2)
 
 # Load model
-cars_model <- read_rds(here::here("R", "model-api", "cars-model.rds"))
+cars_model <- readr::read_rds(here::here("R", "model-api", "cars-model.rds"))
 
 #* @apiTitle mtcars model API
 #* @apiDescription Endpoints for working with mtcars dataset model
@@ -23,9 +23,9 @@ function(req){
 function(req) {
   # browser()
   # Only parse responseBody if final endpoint is /predict/...
-  if (str_detect(req$PATH_INFO, "predict")) {
+  if (grepl("predict", req$PATH_INFO)) {
     # Parse postBody into data.frame and store in req
-    req$predict_data <- jsonlite:::fromJSON(req$postBody)
+    req$predict_data <- jsonlite::fromJSON(req$postBody)
     # Predict based on values in postBody and store in req
     req$predicted_values <- predict(cars_model, req$predict_data)
   }
@@ -51,9 +51,9 @@ function(column, req) {
   
   format_list[[column]] <- formattable::color_tile("white", "red")
   
-  bind_cols(req$predict_data, predicted_mpg = req$predicted_values) %>% 
-    arrange(predicted_mpg) %>% 
-    formattable::format_table(format_list)
+  table_data <- cbind(req$predict_data, predicted_mpg = req$predicted_values)
+  table_data <- table_data[order(table_data$predicted_mpg),]
+  formattable::format_table(table_data, format_list, row.names = FALSE)
 }
 
 #* Plot submitted data
@@ -62,7 +62,7 @@ function(column, req) {
 #* @png
 #* @post /predict/plot
 function(req, x, y){
-  plot_data <- bind_cols(req$predict_data, predicted_mpg = req$predicted_values)
+  plot_data <- dplyr::bind_cols(req$predict_data, predicted_mpg = req$predicted_values)
   p <- ggplot(plot_data, aes_string(x = x, y = y)) +
     geom_point() +
     theme_minimal()
