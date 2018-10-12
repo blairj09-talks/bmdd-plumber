@@ -1,86 +1,162 @@
 [
   {
-    "car_name": "Mazda RX4",
-    "mpg": 21,
     "cyl": 6,
-    "disp": 160,
     "hp": 110,
-    "drat": 3.9,
-    "wt": 2.62,
-    "qsec": 16.46,
-    "vs": 0,
-    "am": 1,
-    "gear": 4,
-    "carb": 4
+    "_row": "Mazda RX4"
   },
   {
-    "car_name": "Mazda RX4 Wag",
-    "mpg": 21,
     "cyl": 6,
-    "disp": 160,
     "hp": 110,
-    "drat": 3.9,
-    "wt": 2.875,
-    "qsec": 17.02,
-    "vs": 0,
-    "am": 1,
-    "gear": 4,
-    "carb": 4
+    "_row": "Mazda RX4 Wag"
   },
   {
-    "car_name": "Datsun 710",
-    "mpg": 22.8,
     "cyl": 4,
-    "disp": 108,
     "hp": 93,
-    "drat": 3.85,
-    "wt": 2.32,
-    "qsec": 18.61,
-    "vs": 1,
-    "am": 1,
-    "gear": 4,
-    "carb": 1
+    "_row": "Datsun 710"
   },
   {
-    "car_name": "Hornet 4 Drive",
-    "mpg": 21.4,
     "cyl": 6,
-    "disp": 258,
     "hp": 110,
-    "drat": 3.08,
-    "wt": 3.215,
-    "qsec": 19.44,
-    "vs": 1,
-    "am": 0,
-    "gear": 3,
-    "carb": 1
+    "_row": "Hornet 4 Drive"
   },
   {
-    "car_name": "Hornet Sportabout",
-    "mpg": 18.7,
     "cyl": 8,
-    "disp": 360,
     "hp": 175,
-    "drat": 3.15,
-    "wt": 3.44,
-    "qsec": 17.02,
-    "vs": 0,
-    "am": 0,
-    "gear": 3,
-    "carb": 2
+    "_row": "Hornet Sportabout"
   },
   {
-    "car_name": "Valiant",
-    "mpg": 18.1,
     "cyl": 6,
-    "disp": 225,
     "hp": 105,
-    "drat": 2.76,
-    "wt": 3.46,
-    "qsec": 20.22,
-    "vs": 1,
-    "am": 0,
-    "gear": 3,
-    "carb": 1
+    "_row": "Valiant"
+  },
+  {
+    "cyl": 8,
+    "hp": 245,
+    "_row": "Duster 360"
+  },
+  {
+    "cyl": 4,
+    "hp": 62,
+    "_row": "Merc 240D"
+  },
+  {
+    "cyl": 4,
+    "hp": 95,
+    "_row": "Merc 230"
+  },
+  {
+    "cyl": 6,
+    "hp": 123,
+    "_row": "Merc 280"
+  },
+  {
+    "cyl": 6,
+    "hp": 123,
+    "_row": "Merc 280C"
+  },
+  {
+    "cyl": 8,
+    "hp": 180,
+    "_row": "Merc 450SE"
+  },
+  {
+    "cyl": 8,
+    "hp": 180,
+    "_row": "Merc 450SL"
+  },
+  {
+    "cyl": 8,
+    "hp": 180,
+    "_row": "Merc 450SLC"
+  },
+  {
+    "cyl": 8,
+    "hp": 205,
+    "_row": "Cadillac Fleetwood"
+  },
+  {
+    "cyl": 8,
+    "hp": 215,
+    "_row": "Lincoln Continental"
+  },
+  {
+    "cyl": 8,
+    "hp": 230,
+    "_row": "Chrysler Imperial"
+  },
+  {
+    "cyl": 4,
+    "hp": 66,
+    "_row": "Fiat 128"
+  },
+  {
+    "cyl": 4,
+    "hp": 52,
+    "_row": "Honda Civic"
+  },
+  {
+    "cyl": 4,
+    "hp": 65,
+    "_row": "Toyota Corolla"
+  },
+  {
+    "cyl": 4,
+    "hp": 97,
+    "_row": "Toyota Corona"
+  },
+  {
+    "cyl": 8,
+    "hp": 150,
+    "_row": "Dodge Challenger"
+  },
+  {
+    "cyl": 8,
+    "hp": 150,
+    "_row": "AMC Javelin"
+  },
+  {
+    "cyl": 8,
+    "hp": 245,
+    "_row": "Camaro Z28"
+  },
+  {
+    "cyl": 8,
+    "hp": 175,
+    "_row": "Pontiac Firebird"
+  },
+  {
+    "cyl": 4,
+    "hp": 66,
+    "_row": "Fiat X1-9"
+  },
+  {
+    "cyl": 4,
+    "hp": 91,
+    "_row": "Porsche 914-2"
+  },
+  {
+    "cyl": 4,
+    "hp": 113,
+    "_row": "Lotus Europa"
+  },
+  {
+    "cyl": 8,
+    "hp": 264,
+    "_row": "Ford Pantera L"
+  },
+  {
+    "cyl": 6,
+    "hp": 175,
+    "_row": "Ferrari Dino"
+  },
+  {
+    "cyl": 8,
+    "hp": 335,
+    "_row": "Maserati Bora"
+  },
+  {
+    "cyl": 4,
+    "hp": 109,
+    "_row": "Volvo 142E"
   }
 ]
