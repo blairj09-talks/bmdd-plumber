@@ -29,8 +29,6 @@ ui <- fluidPage(
             fluidRow(
               actionButton("submit",
                            "Submit"),
-              actionButton("refresh",
-                           "Refresh"),
               actionButton("clear",
                            "Clear")
             )
@@ -58,7 +56,7 @@ server <- function(input, output) {
                encode = "json")
   })
   
-  api_results <- eventReactive(list(input$submit, input$refresh), {
+  api_results <- eventReactive(list(input$submit, input$clear, input$highlight_column), {
     # Retrieve html table
     res <- httr::GET(url = paste0(base_url, "/predict/table/", input$highlight_column))
     
