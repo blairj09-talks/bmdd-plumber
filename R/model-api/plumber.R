@@ -50,7 +50,7 @@ function(req, res) {
 }
 
 #* Add data
-#* @post /data
+#* @post /predict/data
 function(req, res) {
   data <- tryCatch(jsonlite::fromJSON(req$postBody),
                    error = function(e) NULL)
