@@ -53,7 +53,7 @@ server <- function(input, output) {
   
   observeEvent(input$submit, {
     # Post data
-    httr::POST(url = paste0(base_url, "/predict/data"),
+    httr::POST(url = paste0(base_url, "/data"),
                body = data.frame(hp = as.numeric(input$hp), cyl = as.numeric(input$cyl)),
                encode = "json")
   })

@@ -17,12 +17,27 @@ function(req){
   forward()
 }
 
+#* Clean up cookie
+#* @filter clean-cookie
+function(req, res) {
+  if (!is.null(req$cookies$data)) {
+    print(paste("Data cookie:", req$cookies$data))
+    print(paste("Clean cookie:", stringr::str_extract(req$cookies$data, "\\[.*\\]")))
+    if (req$cookies$data != 0) {
+      # Clean up cookie (issue with leading and trailing " when deployed to RSC)
+      req$cookies$data <- stringr::str_extract(req$cookies$data, "\\[.*\\]|^0$")
+    }
+  }
+  
+  print(paste("Cleaned Data cookie:", req$cookies$data))
+  
+  forward()
+}
+
 #* Parse and predict on model data for future endpoints
 #* @filter predict
 function(req, res) {
   # Only parse data if final endpoint is /predict/...
-  print(paste("Data cookie:", req$cookies$data))
-  print(paste("Clean cookie:", stringr::str_extract(req$cookies$data, "\\[.*\\]")))
   if (grepl("predict", req$PATH_INFO)) {
     # Parse postBody into data.frame and store in req
     if (is.null(req$cookies$data)) {
@@ -35,9 +50,6 @@ function(req, res) {
       return(list(error = "No data provided."))
     }
     
-    # Clean up cookie (issue with leading and trailing " when deployed to RSC)
-    req$cookies$data <- stringr::str_extract(req$cookies$data, "\\[.*\\]")
-    print(paste("Cleaned Data cookie:", req$cookies$data))
     # Store predict data and predicted values in request
     req$predict_data <- jsonlite::fromJSON(req$cookies$data)
     
@@ -50,7 +62,7 @@ function(req, res) {
 }
 
 #* Add data
-#* @post /predict/data
+#* @post /data
 function(req, res) {
   data <- tryCatch(jsonlite::fromJSON(req$postBody),
                    error = function(e) NULL)
