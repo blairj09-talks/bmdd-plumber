@@ -1,8 +1,8 @@
 # Building robust APIs in R with [plumber](https://www.rplumber.io)
 
-Talk given at the Salt Lake City R Users Group
+Talk given at the Big Mountain Data & Dev conference, October 12, 2018. Built on top of [presentation given at SLC RUG](https://github.com/blairj09/slc-rug-plumber).
 
-August 9, 2018
+October 12, 2018
 
 ---
 
