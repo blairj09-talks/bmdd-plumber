@@ -1,5 +1,4 @@
 library(plumber)
-library(ggplot2)
 
 # Load model
 cars_model <- readRDS("cars-model.rds")
@@ -21,20 +20,27 @@ function(req){
 #* Parse and predict on model data for future endpoints
 #* @filter predict
 function(req, res) {
-  # browser()
-  # Only parse responseBody if final endpoint is /predict/...
+  # Only parse data if final endpoint is /predict/...
+  print(paste("Data cookie:", req$cookies$data))
+  print(paste("Clean cookie:", stringr::str_extract(req$cookies$data, "\\[.*\\]")))
   if (grepl("predict", req$PATH_INFO)) {
     # Parse postBody into data.frame and store in req
-    req$predict_data <- tryCatch(jsonlite::fromJSON(req$postBody),
-                                 error = function(e) NULL)
-    if (is.null(req$predict_data)) {
+    if (is.null(req$cookies$data)) {
       res$status <- 400
-      return(
-        list(
-          error = "No JSON data included in request body."
-        )
-      )
+      return(list(error = "No data provided."))
     }
+    
+    if (req$cookies$data == 0) {
+      res$status <- 400
+      return(list(error = "No data provided."))
+    }
+    
+    # Clean up cookie (issue with leading and trailing " when deployed to RSC)
+    req$cookies$data <- stringr::str_extract(req$cookies$data, "\\[.*\\]")
+    print(paste("Cleaned Data cookie:", req$cookies$data))
+    # Store predict data and predicted values in request
+    req$predict_data <- jsonlite::fromJSON(req$cookies$data)
+    
     # Predict based on values in postBody and store in req
     req$predicted_values <- predict(cars_model, req$predict_data)
   }
@@ -43,8 +49,38 @@ function(req, res) {
   forward()
 }
 
+#* Add data
+#* @post /data
+function(req, res) {
+  data <- tryCatch(jsonlite::fromJSON(req$postBody),
+                   error = function(e) NULL)
+  if (is.null(data)) {
+    res$status <- 400
+    return(list(error = "No data provided"))
+  }
+  
+  if (!is.null(req$cookies$data)) {
+    if (req$cookies$data != 0) {
+      data <- rbind(data, jsonlite::fromJSON(req$cookies$data))
+    }
+  }
+  
+  res$setCookie("data", jsonlite::toJSON(data))
+  list(message = "Data received and stored in cookie")
+}
+
+#* Clear cookie
+#* @param cookie_name Cookie to clear
+#* @get /clear
+function(req, res) {
+  res$setCookie("data", 0)
+  list(
+    message = "data cookie cleared."
+  )
+}
+
 #* Predict the MPG of a given car(s)
-#* @post /predict/values
+#* @get /predict/values
 function(req) {
   req$predicted_values
 }
@@ -53,10 +89,9 @@ function(req) {
 #* @param column:character Column name to be highlighted
 #* @response 400 Invalid column specified
 #* @html
-#* @post /predict/table/<column>
-function(column, req, res) {
+#* @get /predict/table/<column>
+function(req, res, column) {
   table_data <- cbind(req$predict_data, predicted_mpg = req$predicted_values)
-  
   # Error if column isn't in data
   if (!column %in% names(table_data)) {
     res$status <- 400
@@ -70,19 +105,5 @@ function(column, req, res) {
   format_list[[column]] <- formattable::color_tile("white", "red")
   
   table_data <- table_data[order(table_data$predicted_mpg),]
-  formattable::format_table(table_data, format_list, row.names = FALSE)
-}
-
-#* Plot submitted data
-#* @param x X axis variable
-#* @param y Y axis variable
-#* @png
-#* @post /predict/plot
-function(req, x, y){
-  plot_data <- cbind(req$predict_data, predicted_mpg = req$predicted_values)
-  p <- ggplot(plot_data, aes_string(x = x, y = y)) +
-    geom_point() +
-    theme_minimal()
-  
-  print(p)
+  formattable::format_table(table_data, format_list, row.names = TRUE)
 }
