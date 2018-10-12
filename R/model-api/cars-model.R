@@ -1,7 +1,7 @@
 # Build simple model from mtcars dataset
 
-# Model ----
-cars_model <- lm(mpg ~ cyl + disp + hp + drat + wt + qsec + vs + am + gear + carb,
+# Model ---- (insert fancy model here)
+cars_model <- lm(mpg ~ cyl + hp,
                  data = mtcars)
 
 # Save model ----
