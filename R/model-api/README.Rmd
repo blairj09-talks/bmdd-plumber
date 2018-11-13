@@ -1,0 +1,10 @@
+---
+title: "Cars Model API"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+This API demonstrates how to take a machine learning model trained in R and expose it via a REST API endpoint using the `plumber` package.

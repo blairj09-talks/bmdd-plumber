@@ -1,0 +1,10 @@
+---
+title: "Cars Model Application"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+This is a shiny application that interacts with the cars model API defined in [model-api](../model-api).
