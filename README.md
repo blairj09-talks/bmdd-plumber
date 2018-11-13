@@ -1,15 +1,6 @@
-# Building robust APIs in R with [plumber](https://www.rplumber.io)
+# Deploying ML models via `plumber`
 
-Talk given at the Big Mountain Data & Dev conference, October 12, 2018. Built on top of [presentation given at SLC RUG](https://github.com/blairj09/slc-rug-plumber).
+This repository provides a working example for deploying a Machine Learning model via the [`plumber`]() package. It is loosely based off of [a talk](https://github.com/blairj09/bmdd-plumber) given at [Big Mountain Data & Dev](https://www.utahgeekevents.com/events/big-mountain-data-dev/).
 
-October 12, 2018
+There are two separate pieces to this example. The [model-api](R/model-api) files provide scripts for both training a simple model and building a `plumber` API to serve that model. The [model-input-app](R/model-input-app) files build a simple shiny application to interact with the deployed model API.
 
----
-
-This repository contains:
-
-- [All code used for examples](R)
-- [A pdf file of the presentation](presentation/slc-rug-plumber-presentation.pdf)
-
----
-![](images/presentation-screenshot.png)
