@@ -15,8 +15,6 @@ function(req){
   cat(as.character(Sys.time()), "-", 
       req$REQUEST_METHOD, req$PATH_INFO, "-", 
       req$HTTP_USER_AGENT, "@", req$REMOTE_ADDR, "\n")
-  
-  # Forward the request
   forward()
 }
 
@@ -25,7 +23,7 @@ function(req){
 #* @filter clean-cookie
 function(req, res) {
   if (!is.null(req$cookies$data)) {
-    if (req$cookies$data != 0) {
+    if (req$cookies$data != "NA") {
       # Clean up cookie (issue with leading and trailing " when deployed to RSC)
       req$cookies$data <- stringr::str_extract(req$cookies$data, "\\[.*\\]|^0$")
     }
@@ -40,12 +38,7 @@ function(req, res) {
   # Only parse data if final endpoint is /predict/...
   if (grepl("predict", req$PATH_INFO)) {
     # Parse postBody into data.frame and store in req
-    if (is.null(req$cookies$data)) {
-      res$status <- 400
-      return(list(error = "No data provided."))
-    }
-    
-    if (req$cookies$data == 0) {
+    if (is.null(req$cookies$data) || req$cookies$data == "NA") {
       res$status <- 400
       return(list(error = "No data provided."))
     }
@@ -56,8 +49,6 @@ function(req, res) {
     # Predict based on values in postBody and store in req
     req$predicted_values <- predict(cars_model, req$predict_data)
   }
-  
-  # Forward the request
   forward()
 }
 
@@ -73,10 +64,8 @@ function(req, res) {
   }
   
   # Add new data to existing data stored in cookie
-  if (!is.null(req$cookies$data)) {
-    if (req$cookies$data != 0) {
-      data <- rbind(data, jsonlite::fromJSON(req$cookies$data))
-    }
+  if (!is.null(req$cookies$data) && req$cookies$data != "NA") {
+    data <- rbind(data, jsonlite::fromJSON(req$cookies$data))
   }
   
   # Store data in cookie
@@ -89,7 +78,8 @@ function(req, res) {
 #* @param cookie_name:character Name of cookie to delete
 #* @delete /<cookie_name>
 function(req, res, cookie_name) {
-  res$setCookie(cookie_name, NULL)
+  # Note: cookie is stored as character
+  res$setCookie(cookie_name, NA)
   list(
     message = glue::glue("{cookie_name} cookie cleared.")
   )
