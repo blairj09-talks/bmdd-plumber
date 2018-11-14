@@ -3,4 +3,3 @@ default:
   
 rsconnect:
   base_url: "http://colorado.rstudio.com/rsc/carmodel"
-  

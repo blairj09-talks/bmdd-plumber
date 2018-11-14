@@ -2,7 +2,7 @@
 library(shiny)
 library(httr)
 
-base_url <- config::get("base_url", config = "rsconnect")
+base_url <- config::get("base_url")
 
 ui <- fluidPage(
 
@@ -46,7 +46,8 @@ ui <- fluidPage(
 
 server <- function(input, output) {
   observeEvent(input$clear, {
-    httr::GET(url = paste0(base_url, "/clear"))
+    # Make call to clear the data cookie
+    httr::DELETE(url = paste0(base_url, "/data"))
   })
   
   observeEvent(input$submit, {
@@ -61,11 +62,11 @@ server <- function(input, output) {
     res <- httr::GET(url = paste0(base_url, "/predict/table/", input$highlight_column))
     
     # Extract html_table
-    html_table <- httr::content(res, as = "text")
+    html_table <- httr::content(res, as = "text", encoding = "UTF-8")
     
     # Get raw results
     res <- httr::GET(url = paste0(base_url, "/predict/values"))
-    json_predictions <- httr::content(res, as = "text")
+    json_predictions <- httr::content(res, as = "text", encoding = "UTF-8")
     
     if (grepl("No data provided", html_table)) {
       html_table <- ""
