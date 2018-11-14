@@ -4,7 +4,73 @@ output: github_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(eval = FALSE)
+
+knitr::read_chunk("plumber.R")
+knitr::read_chunk("cars-model.R")
 ```
 
-This API demonstrates how to take a machine learning model trained in R and expose it via a REST API endpoint using the `plumber` package.
+This API demonstrates how to take a machine learning model trained in R and expose it via REST API endpoints using the `plumber` package. In this example, a simple linear model is built on top of the `mtcars` dataset.
+
+```{r cars-model}
+```
+
+This code creates the cars model and saves it as an `.rds` file. The [`here`](https://github.com/r-lib/here) package is used to provide help with file paths.
+
+Once the model has been trained and saved, a series of API endpoints can be built around the model. For this example, new data is submitted by the user and stored in a cookie attached to the user session. This pattern allows the user to submit additional data while using cookies to maintain user state.
+
+These endpoints are defined in [`plumber.R`](plumber.R) and explained in detail here.
+
+## API Setup
+```{r api-setup}
+```
+
+This initial setup loads the `plumber` package, loads the saved model, and provides some additional API details (Title and Description)
+
+## Filters
+[Filters](https://www.rplumber.io/docs/routing-and-input.html#filters) are used by Plumber to peform some action on an incoming request and then forward the request along to the next stop on the router. This API uses a few different filters.
+
+### Log
+```{r filter-logger}
+```
+
+This filter is pulled directly from the [Plumber docs](https://www.rplumber.io/docs/routing-and-input.html#forward-to-another-handler) and logs information about incoming requests and then forwards the request on to subsequent endpoints.
+
+### Clean Cookies
+The `clean-cookie` filter makes sure that the JSON stored in the "data" cookie of the incoming request is appropriately formatted for `jsonlite` to parse by removing leading and trailing `"` that are sometimes added to the JSON.
+
+```{r filter-clean-cookie}
+```
+
+### Predict
+Finally, we use a filter to parse incoming data and use the model to calculate predictions on the new data. Both the parsed data and the predicted values are stored in the request object so they can easily be used by downstream endpoints. This filter uses the data stored in the cookies of the request to calculate new predictions. Data is stored in the "data" cookie via the `/data` endpoint, which is defined next.
+
+```{r filter-predict}
+```
+
+## Endpoints
+Each endpoint defined in the API serves a different purpose.
+
+### POST data
+This API anticipates that users submit JSON data via a POST request. In Plumber, data submitted with a POST request can be accessed via `req$postBody`. In this endpoint, submitted data is first checked to see if it is valid JSON. If valid JSON is found, the data is converted into a `data.frame`, appended to any existing data stored in the "data" cookie, then serialized back into JSON and stored in the "data" cookie on the user session. This data is processed and used by the model in the `predict` filter described previously.
+
+```{r post-data}
+```
+
+### DELETE cookie
+```{r delete-cookie}
+```
+
+This endpoint provides a mechanism for resetting the data cookie for a users session. It has been designed so that it can generalized to reset any cookie.
+
+### GET predict values
+```{r get-predict-values}
+```
+
+This endpoint returns the predicted values based on the data stored in the users' "data" cookie in a JSON response. The data that is returned is calculated in the `predict` filter.
+
+### GET predict table
+```{r get-predict-table}
+```
+
+This endpoint defines an HTML table based on the submitted data along with the predicted values. The user can specify which `column` of the table should be highlighted with the `column` [dynamic path argument](https://www.rplumber.io/docs/routing-and-input.html#dynamic-routes).
