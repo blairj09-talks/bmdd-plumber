@@ -1,11 +1,14 @@
+## ---- api-setup
 library(plumber)
 
 # Load model
+# Depending on model size, this can be a farily expensive operation
 cars_model <- readRDS("cars-model.rds")
 
 #* @apiTitle mtcars model API
 #* @apiDescription Endpoints for working with mtcars dataset model
 
+## ---- filter-logger
 #* Log some information about the incoming request
 #* @filter logger
 function(req){
@@ -17,23 +20,20 @@ function(req){
   forward()
 }
 
+## ---- filter-clean-cookie
 #* Clean up cookie
 #* @filter clean-cookie
 function(req, res) {
   if (!is.null(req$cookies$data)) {
-    print(paste("Data cookie:", req$cookies$data))
-    print(paste("Clean cookie:", stringr::str_extract(req$cookies$data, "\\[.*\\]")))
     if (req$cookies$data != 0) {
       # Clean up cookie (issue with leading and trailing " when deployed to RSC)
       req$cookies$data <- stringr::str_extract(req$cookies$data, "\\[.*\\]|^0$")
     }
   }
-  
-  print(paste("Cleaned Data cookie:", req$cookies$data))
-  
   forward()
 }
 
+## ---- filter-predict
 #* Parse and predict on model data for future endpoints
 #* @filter predict
 function(req, res) {
@@ -61,6 +61,7 @@ function(req, res) {
   forward()
 }
 
+## ---- post-data
 #* Add data
 #* @post /data
 function(req, res) {
@@ -71,32 +72,37 @@ function(req, res) {
     return(list(error = "No data provided"))
   }
   
+  # Add new data to existing data stored in cookie
   if (!is.null(req$cookies$data)) {
     if (req$cookies$data != 0) {
       data <- rbind(data, jsonlite::fromJSON(req$cookies$data))
     }
   }
   
+  # Store data in cookie
   res$setCookie("data", jsonlite::toJSON(data))
   list(message = "Data received and stored in cookie")
 }
 
-#* Clear cookie
-#* @param cookie_name Cookie to clear
-#* @get /clear
-function(req, res) {
-  res$setCookie("data", 0)
+## ---- delete-cookie
+#* Clear specified cookie
+#* @param cookie_name:character Name of cookie to delete
+#* @delete /<cookie_name>
+function(req, res, cookie_name) {
+  res$setCookie(cookie_name, NULL)
   list(
-    message = "data cookie cleared."
+    message = glue::glue("{cookie_name} cookie cleared.")
   )
 }
 
-#* Predict the MPG of a given car(s)
+## ---- get-predict-values
+#* Retrieve predicted MPG values for given car data
 #* @get /predict/values
 function(req) {
   req$predicted_values
 }
 
+## ---- get-predict-table
 #* Predicted values in nice HTML table
 #* @param column:character Column name to be highlighted
 #* @response 400 Invalid column specified

@@ -1,5 +1,6 @@
 # Build simple model from mtcars dataset
 
+## ---- cars-model
 # Model ---- (insert fancy model here)
 cars_model <- lm(mpg ~ cyl + hp,
                  data = mtcars)
