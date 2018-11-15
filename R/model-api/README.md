@@ -49,7 +49,7 @@ immediately available.
 ## Filters
 
 [Filters](https://www.rplumber.io/docs/routing-and-input.html#filters)
-are used by Plumber to peform some action on an incoming request and
+are used by Plumber to perform some action on an incoming request and
 then forward the request along to the next stop on the router. This API
 uses a filter to log information about incoming requests, as described
 in the [Plumber
