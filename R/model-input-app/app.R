@@ -80,8 +80,10 @@ server <- function(input, output) {
     reactive_values$predicted_values <- httr::content(api_res, as = "text", encoding = "UTF-8")
     
     # Add predicted values to data
-    reactive_values$data <- cbind(reactive_values$data, 
-                                  predicted_mpg = as.numeric(jsonlite::fromJSON(reactive_values$predicted_values)))
+    if (!"predicted_mpg" %in% names(reactive_values$data)) {
+      reactive_values$data <- cbind(reactive_values$data, 
+                                    predicted_mpg = as.numeric(jsonlite::fromJSON(reactive_values$predicted_values)))
+    }
   })
   
   output$data <- renderTable(reactive_values$data)
