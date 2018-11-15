@@ -23,7 +23,7 @@ Once the model has been trained and saved, a series of API endpoints can be buil
 ```{r api-setup}
 ```
 
-This initial setup loads the `plumber` package, loads the saved model, and provides some additional API details (Title and Description)
+This initial setup loads the `plumber` package, loads the saved model, and provides some additional API details (Title and Description). Note that the `cars_model` object is loaded into the global environment here, and is then made available to any filters and endpoints that are subsequently defined. We could also load the model inside the actual `/predict` endpoint function that utilizes the model. However, this would mean that every time the `/predict` endpoint was called, the model would first be loaded before it could be used, rather than being immediately available.
 
 ## Filters
 [Filters](https://www.rplumber.io/docs/routing-and-input.html#filters) are used by Plumber to peform some action on an incoming request and then forward the request along to the next stop on the router. This API uses a filter to log information about incoming requests, as described in the [Plumber docs](https://www.rplumber.io/docs/routing-and-input.html#forward-to-another-handler).

@@ -37,7 +37,14 @@ cars_model <- readRDS("cars-model.rds")
 ```
 
 This initial setup loads the `plumber` package, loads the saved model,
-and provides some additional API details (Title and Description)
+and provides some additional API details (Title and Description). Note
+that the `cars_model` object is loaded into the global environment here,
+and is then made available to any filters and endpoints that are
+subsequently defined. We could also load the model inside the actual
+`/predict` endpoint function that utilizes the model. However, this
+would mean that every time the `/predict` endpoint was called, the model
+would first be loaded before it could be used, rather than being
+immediately available.
 
 ## Filters
 
