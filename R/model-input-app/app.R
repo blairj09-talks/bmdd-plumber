@@ -87,7 +87,7 @@ server <- function(input, output) {
   output$data <- renderTable(reactive_values$data)
   output$raw_results <- renderPrint({
     if (is.null(reactive_values$predicted_values)) {
-      NULL
+      "No predictions"
     } else {
       jqr::jq(reactive_values$predicted_values)
     }
