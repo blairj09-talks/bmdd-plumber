@@ -21,22 +21,14 @@ ui <- fluidPage(
                         "Cylinder",
                         choices = sort(unique(mtcars$cyl)),
                         selected = sort(unique(mtcars$cyl))[1]),
-            hr(),
-            selectInput("highlight_column",
-                        "Highlighted column",
-                        choices = c("hp", "cyl"),
-                        selected = "hp"),
             fluidRow(
               actionButton("submit",
-                           "Submit"),
-              actionButton("clear",
-                           "Clear")
+                           "Submit")
             )
         ),
 
         # Show a plot of the generated distribution
         mainPanel(
-           htmlOutput("results_table"),
            wellPanel(
              textOutput("raw_results")
            )
@@ -45,43 +37,16 @@ ui <- fluidPage(
 )
 
 server <- function(input, output) {
-  observeEvent(input$clear, {
-    # Make call to clear the data cookie
-    httr::DELETE(url = paste0(base_url, "/data"))
-  })
-  
-  observeEvent(input$submit, {
+  predicted_values <- eventReactive(input$submit, {
     # Post data
-    httr::POST(url = paste0(base_url, "/data"),
-               body = data.frame(hp = as.numeric(input$hp), cyl = as.numeric(input$cyl)),
-               encode = "json")
+    api_res <- httr::POST(url = paste0(base_url, "/predict"),
+                           body = data.frame(hp = as.numeric(input$hp), cyl = as.numeric(input$cyl)),
+                           encode = "json")
+    
+    httr::content(api_res, as = "text", encoding = "UTF-8")
   })
   
-  api_results <- eventReactive(list(input$submit, input$clear, input$highlight_column), {
-    # Retrieve html table
-    res <- httr::GET(url = paste0(base_url, "/predict/table/", input$highlight_column))
-    
-    # Extract html_table
-    html_table <- httr::content(res, as = "text", encoding = "UTF-8")
-    
-    # Get raw results
-    res <- httr::GET(url = paste0(base_url, "/predict/values"))
-    json_predictions <- httr::content(res, as = "text", encoding = "UTF-8")
-    
-    if (grepl("No data provided", html_table)) {
-      html_table <- ""
-      json_predictions <- ""
-    }
-    
-    list(
-      html_table = html_table,
-      json_predictions = json_predictions
-    )
-  })
-  
-  output$results_table <- renderText(api_results()$html_table)
-  
-  output$raw_results <- renderPrint(api_results()$json_predictions)
+  output$raw_results <- renderPrint(predicted_values())
 }
 
 shinyApp(ui = ui, server = server)
