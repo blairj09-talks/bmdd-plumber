@@ -20,13 +20,8 @@ This code creates the cars model and saves it as an `.rds` file. The
 with file paths.
 
 Once the model has been trained and saved, a series of API endpoints can
-be built around the model. For this example, new data is submitted by
-the user and stored in a cookie attached to the user session. This
-pattern allows the user to submit additional data while using cookies to
-maintain user state.
-
-These endpoints are defined in [`plumber.R`](plumber.R) and explained in
-detail here.
+be built around the model. These endpoints are defined in
+[`plumber.R`](plumber.R) and explained in detail here.
 
 ## API Setup
 
@@ -49,9 +44,9 @@ and provides some additional API details (Title and Description)
 [Filters](https://www.rplumber.io/docs/routing-and-input.html#filters)
 are used by Plumber to peform some action on an incoming request and
 then forward the request along to the next stop on the router. This API
-uses a few different filters.
-
-### Log
+uses a filter to log information about incoming requests, as described
+in the [Plumber
+docs](https://www.rplumber.io/docs/routing-and-input.html#forward-to-another-handler).
 
 ``` r
 #* Log some information about the incoming request
@@ -60,175 +55,31 @@ function(req){
   cat(as.character(Sys.time()), "-", 
       req$REQUEST_METHOD, req$PATH_INFO, "-", 
       req$HTTP_USER_AGENT, "@", req$REMOTE_ADDR, "\n")
-  
-  # Forward the request
-  forward()
-}
-```
-
-This filter is pulled directly from the [Plumber
-docs](https://www.rplumber.io/docs/routing-and-input.html#forward-to-another-handler)
-and logs information about incoming requests and then forwards the
-request on to subsequent endpoints.
-
-### Clean Cookies
-
-The `clean-cookie` filter makes sure that the JSON stored in the “data”
-cookie of the incoming request is appropriately formatted for `jsonlite`
-to parse by removing leading and trailing `"` that are sometimes added
-to the JSON.
-
-``` r
-#* Clean up cookie
-#* @filter clean-cookie
-function(req, res) {
-  if (!is.null(req$cookies$data)) {
-    if (req$cookies$data != 0) {
-      # Clean up cookie (issue with leading and trailing " when deployed to RSC)
-      req$cookies$data <- stringr::str_extract(req$cookies$data, "\\[.*\\]|^0$")
-    }
-  }
-  forward()
-}
-```
-
-### Predict
-
-Finally, we use a filter to parse incoming data and use the model to
-calculate predictions on the new data. Both the parsed data and the
-predicted values are stored in the request object so they can easily be
-used by downstream endpoints. This filter uses the data stored in the
-cookies of the request to calculate new predictions. Data is stored in
-the “data” cookie via the `/data` endpoint, which is defined next.
-
-``` r
-#* Parse and predict on model data for future endpoints
-#* @filter predict
-function(req, res) {
-  # Only parse data if final endpoint is /predict/...
-  if (grepl("predict", req$PATH_INFO)) {
-    # Parse postBody into data.frame and store in req
-    if (is.null(req$cookies$data)) {
-      res$status <- 400
-      return(list(error = "No data provided."))
-    }
-    
-    if (req$cookies$data == 0) {
-      res$status <- 400
-      return(list(error = "No data provided."))
-    }
-    
-    # Store predict data and predicted values in request
-    req$predict_data <- jsonlite::fromJSON(req$cookies$data)
-    
-    # Predict based on values in postBody and store in req
-    req$predicted_values <- predict(cars_model, req$predict_data)
-  }
-  
-  # Forward the request
   forward()
 }
 ```
 
 ## Endpoints
 
-Each endpoint defined in the API serves a different purpose.
-
-### POST data
-
 This API anticipates that users submit JSON data via a POST request. In
 Plumber, data submitted with a POST request can be accessed via
 `req$postBody`. In this endpoint, submitted data is first checked to see
 if it is valid JSON. If valid JSON is found, the data is converted into
-a `data.frame`, appended to any existing data stored in the “data”
-cookie, then serialized back into JSON and stored in the “data” cookie
-on the user session. This data is processed and used by the model in the
-`predict` filter described previously.
+a `data.frame` and then the [model](cars-model.R) is used to form
+predictions based on that data. These predicted values are returned to
+the user as a JSON object.
 
 ``` r
-#* Add data
-#* @post /data
+#* Submit data and get a prediction in return
+#* @post /predict
 function(req, res) {
   data <- tryCatch(jsonlite::fromJSON(req$postBody),
                    error = function(e) NULL)
   if (is.null(data)) {
     res$status <- 400
-    return(list(error = "No data provided"))
+    list(error = "No data submitted")
   }
   
-  # Add new data to existing data stored in cookie
-  if (!is.null(req$cookies$data)) {
-    if (req$cookies$data != 0) {
-      data <- rbind(data, jsonlite::fromJSON(req$cookies$data))
-    }
-  }
-  
-  # Store data in cookie
-  res$setCookie("data", jsonlite::toJSON(data))
-  list(message = "Data received and stored in cookie")
+  predict(cars_model, data)
 }
 ```
-
-### DELETE cookie
-
-``` r
-#* Clear specified cookie
-#* @param cookie_name:character Name of cookie to delete
-#* @delete /<cookie_name>
-function(req, res, cookie_name) {
-  res$setCookie(cookie_name, NULL)
-  list(
-    message = glue::glue("{cookie_name} cookie cleared.")
-  )
-}
-```
-
-This endpoint provides a mechanism for resetting the data cookie for a
-users session. It has been designed so that it can generalized to reset
-any cookie.
-
-### GET predict values
-
-``` r
-#* Retrieve predicted MPG values for given car data
-#* @get /predict/values
-function(req) {
-  req$predicted_values
-}
-```
-
-This endpoint returns the predicted values based on the data stored in
-the users’ “data” cookie in a JSON response. The data that is returned
-is calculated in the `predict` filter.
-
-### GET predict table
-
-``` r
-#* Predicted values in nice HTML table
-#* @param column:character Column name to be highlighted
-#* @response 400 Invalid column specified
-#* @html
-#* @get /predict/table/<column>
-function(req, res, column) {
-  table_data <- cbind(req$predict_data, predicted_mpg = req$predicted_values)
-  # Error if column isn't in data
-  if (!column %in% names(table_data)) {
-    res$status <- 400
-    return()
-  }
-  
-  format_list <- list(
-    predicted_mpg = formattable::color_tile("red", "white")
-  )
-  
-  format_list[[column]] <- formattable::color_tile("white", "red")
-  
-  table_data <- table_data[order(table_data$predicted_mpg),]
-  formattable::format_table(table_data, format_list, row.names = TRUE)
-}
-```
-
-This endpoint defines an HTML table based on the submitted data along
-with the predicted values. The user can specify which `column` of the
-table should be highlighted with the `column` [dynamic path
-argument](https://www.rplumber.io/docs/routing-and-input.html#dynamic-routes).
