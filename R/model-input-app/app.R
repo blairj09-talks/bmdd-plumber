@@ -89,7 +89,7 @@ server <- function(input, output) {
     if (is.null(reactive_values$predicted_values)) {
       "No predictions"
     } else {
-      jqr::jq(reactive_values$predicted_values)
+      jsonlite::prettify(reactive_values$predicted_values)
     }
   })
 }
