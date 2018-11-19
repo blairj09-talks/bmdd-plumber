@@ -74,7 +74,7 @@ Plumber, data submitted with a POST request can be accessed via
 if it is valid JSON. If valid JSON is found, the data is converted into
 a `data.frame` and then the [model](cars-model.R) is used to form
 predictions based on that data. These predicted values are returned to
-the user as a JSON object.
+the client as a JSON object.
 
 ``` r
 #* Submit data and get a prediction in return

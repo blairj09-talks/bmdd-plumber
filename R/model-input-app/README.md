@@ -3,8 +3,8 @@ Cars Model Application
 
 The code here creates a [Shiny](https://shiny.rstudio.com) application
 that interacts with the cars model API defined in
-[model-api](../model-api). The application can be accessed
-[here](http://colorado.rstudio.com/rsc/car-model-app/).
+[model-api](../model-api). A deployed version of the application can be
+accessed [here](http://colorado.rstudio.com/rsc/car-model-app/).
 
 The [`config`](https://github.com/rstudio/config) package is used to
 identify where the API is hosted (either localhost or on [RStudio
@@ -13,6 +13,6 @@ this application uses the default configuration, which expects the
 Plumber API to be running locally on `localhost:5762`. When this
 application is deployed to RStudio Connect, it looks for the API hosted
 at
-`http://colorado.rstudio.com/rsc/carmodel`.
+<http://colorado.rstudio.com/rsc/carmodel>.
 
 [![](images/app-demo.gif)](http://colorado.rstudio.com/rsc/car-model-app/)

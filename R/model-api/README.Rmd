@@ -32,7 +32,7 @@ This initial setup loads the `plumber` package, loads the saved model, and provi
 ```
 
 ## Endpoints
-This API anticipates that users submit JSON data via a POST request. In Plumber, data submitted with a POST request can be accessed via `req$postBody`. In this endpoint, submitted data is first checked to see if it is valid JSON. If valid JSON is found, the data is converted into a `data.frame` and then the [model](cars-model.R) is used to form predictions based on that data. These predicted values are returned to the user as a JSON object.
+This API anticipates that users submit JSON data via a POST request. In Plumber, data submitted with a POST request can be accessed via `req$postBody`. In this endpoint, submitted data is first checked to see if it is valid JSON. If valid JSON is found, the data is converted into a `data.frame` and then the [model](cars-model.R) is used to form predictions based on that data. These predicted values are returned to the client as a JSON object.
 
 ```{r post-data}
 ```
