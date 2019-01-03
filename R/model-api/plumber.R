@@ -12,8 +12,8 @@ cars_model <- readRDS("cars-model.rds")
 #* Log some information about the incoming request
 #* @filter logger
 function(req){
-  cat(as.character(Sys.time()), "-", 
-      req$REQUEST_METHOD, req$PATH_INFO, "-", 
+  cat(as.character(Sys.time()), "-",
+      req$REQUEST_METHOD, req$PATH_INFO, "-",
       req$HTTP_USER_AGENT, "@", req$REMOTE_ADDR, "\n")
   forward()
 }
@@ -28,6 +28,6 @@ function(req, res) {
     res$status <- 400
     list(error = "No data submitted")
   }
-  
+
   predict(cars_model, data)
 }
