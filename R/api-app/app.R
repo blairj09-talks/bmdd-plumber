@@ -9,7 +9,7 @@ base_url <- config::get("base_url")
 ui <- fluidPage(
 
     # Application title
-    titlePanel("Cars Plumber API"),
+    titlePanel("Cars MPG Predictor"),
 
     # Sidebar with a slider input for number of bins 
     sidebarLayout(
