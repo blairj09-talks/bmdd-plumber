@@ -2,7 +2,7 @@
 library(plumber)
 
 # Load model
-# Depending on model size, this can be a farily expensive operation
+# Depending on model size, this can be a fairly expensive operation
 cars_model <- readRDS("cars-model.rds")
 
 #* @apiTitle mtcars model API
