@@ -22,7 +22,7 @@ function(req){
 #* Submit data and get a prediction in return
 #* @post /predict
 function(req, res) {
-  data <- tryCatch(jsonlite::fromJSON(req$postBody),
+  data <- tryCatch(jsonlite::parse_json(req$postBody, simplifyVector = TRUE),
                    error = function(e) NULL)
   if (is.null(data)) {
     res$status <- 400
