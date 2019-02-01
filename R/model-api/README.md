@@ -29,7 +29,7 @@ be built around the model. These endpoints are defined in
 library(plumber)
 
 # Load model
-# Depending on model size, this can be a farily expensive operation
+# Depending on model size, this can be a fairly expensive operation
 cars_model <- readRDS("cars-model.rds")
 
 #* @apiTitle mtcars model API
@@ -59,8 +59,8 @@ docs](https://www.rplumber.io/docs/routing-and-input.html#forward-to-another-han
 #* Log some information about the incoming request
 #* @filter logger
 function(req){
-  cat(as.character(Sys.time()), "-", 
-      req$REQUEST_METHOD, req$PATH_INFO, "-", 
+  cat(as.character(Sys.time()), "-",
+      req$REQUEST_METHOD, req$PATH_INFO, "-",
       req$HTTP_USER_AGENT, "@", req$REMOTE_ADDR, "\n")
   forward()
 }
@@ -80,13 +80,13 @@ the client as a JSON object.
 #* Submit data and get a prediction in return
 #* @post /predict
 function(req, res) {
-  data <- tryCatch(jsonlite::fromJSON(req$postBody),
+  data <- tryCatch(jsonlite::parse_json(req$postBody, simplifyVector = TRUE),
                    error = function(e) NULL)
   if (is.null(data)) {
     res$status <- 400
     list(error = "No data submitted")
   }
-  
+
   predict(cars_model, data)
 }
 ```
