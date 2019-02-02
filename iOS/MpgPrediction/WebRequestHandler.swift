@@ -76,6 +76,4 @@ class WebRequestHandler {
             onError(message)
         })
     }
-
-    
 }
